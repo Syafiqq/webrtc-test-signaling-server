@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start:local": "nodemon -r dotenv/config ./bin/www",
+    "start": "node ./bin/www",
     "heroku:stop": "heroku ps:scale web=0",
     "heroku:start": "heroku ps:scale web=1"
   },
@@ -13,8 +15,12 @@
   "license": "ISC",
   "dependencies": {
     "bufferutil": "^4.0.6",
+    "express": "^4.18.1",
     "ip": "^1.1.5",
     "utf-8-validate": "^5.0.9",
     "ws": "^6.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
   }
 }

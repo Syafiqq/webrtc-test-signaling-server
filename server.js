@@ -1,13 +1,13 @@
-"use strict";
+const PORT = process.env.PORT || 8080;
+const INDEX = '/index.html';
+const express = require('express');
+const { Server } = require('ws');
 
-let WebSocketServer = require('ws').Server;
-let port = process.env.PORT || 8080;
-let wsServer = new WebSocketServer({ port: port });
-const ip = require('ip');
-console.log('websocket server start.' + ' ipaddress = ' + ip.address() + ' port = ' + port);
+const wss = new Server({ server });
+wss.on('connection', (ws) => {
+    console.log('Client connected');
 
-wsServer.on('connection', function (ws) {
-    console.log('-- websocket connected --');
+    ws.on('close', () => console.log('Client disconnected'));
 
     ws.on('message', function (message) {
         console.log('-- message recieved --');
@@ -22,10 +22,8 @@ wsServer.on('connection', function (ws) {
             }
         });
     });
-
 });
 
-function isSame(ws1, ws2) {
-    // -- compare object --
-    return (ws1 === ws2);
-}
+const server = express()
+    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+    .listen(PORT, () => console.log(`Listening on ${PORT}`));
