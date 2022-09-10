@@ -11,8 +11,7 @@ const server = express()
 const wss = new Server({ server });
 let clients = [];
 
-wss.on('request', request => {
-    const wss = request.accept();
+wss.on('connection', wss => {
     const id = Math.floor(Math.random() * 100);
 
     clients.forEach(client => client.connection.send(JSON.stringify({
@@ -28,9 +27,9 @@ wss.on('request', request => {
             .filter(client => client.id !== id)
             .forEach(client => client.connection.send(JSON.stringify({
                 client: id,
-                text: message.utf8Data,
+                text: message,
             })));
-        console.log(`Client-${id} broadcast message`)
+        console.log(`Client-${id} broadcast message ${message}`)
     });
 
     wss.on('close', () => {
