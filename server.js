@@ -33,7 +33,7 @@ wss.on('connection', wss => {
             .filter(client => client.id !== id)
             .forEach(client => client.connection.send(JSON.stringify({
                 client: id,
-                text: message,
+                text: JSON.parse(message),
             })));
         console.log(`Client-${id} broadcast message ${message}`)
     });
