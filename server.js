@@ -1,7 +1,7 @@
 "use strict";
 
 let WebSocketServer = require('ws').Server;
-let port = 8080;
+let port = process.env.PORT || 8080;
 let wsServer = new WebSocketServer({ port: port });
 const ip = require('ip');
 console.log('websocket server start.' + ' ipaddress = ' + ip.address() + ' port = ' + port);
