@@ -15,17 +15,11 @@ function originIsAllowed(origin) {
     return true;
 }
 
-(function (global) {
-    let connections = [];
-    global.getConnections = function () {
-        return connections
-    }
-})(global);
+let connections = [];
 
 wss.on('connection', wss => {
     const id = Math.floor(Math.random() * 100);
 
-    let connections = getConnections()
     connections.forEach(client => client.connection.send(JSON.stringify({
         client: id,
         text: 'I am now connected',
