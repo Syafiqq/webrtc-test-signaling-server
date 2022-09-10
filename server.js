@@ -9,21 +9,33 @@ const server = express()
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 const wss = new Server({ server });
-let clients = [];
+
+function originIsAllowed(origin) {
+    // put logic here to detect whether the specified origin is allowed.
+    return true;
+}
+
+(function (global) {
+    let connections = {};
+    global.getConnections = function () {
+        return connections
+    }
+})(global);
 
 wss.on('connection', wss => {
     const id = Math.floor(Math.random() * 100);
 
-    clients.forEach(client => client.connection.send(JSON.stringify({
+    let connections = getConnections()
+    connections.forEach(client => client.connection.send(JSON.stringify({
         client: id,
         text: 'I am now connected',
     })));
-    clients.push({ connection: wss, id });
+    connections.push({ connection: wss, id });
 
     console.log(`Client-${id} connected`)
 
     wss.on('message', message => {
-        clients
+        connections
             .filter(client => client.id !== id)
             .forEach(client => client.connection.send(JSON.stringify({
                 client: id,
@@ -33,8 +45,8 @@ wss.on('connection', wss => {
     });
 
     wss.on('close', () => {
-        clients = clients.filter(client => client.id !== id);
-        clients.forEach(client => client.connection.send(JSON.stringify({
+        connections = connections.filter(client => client.id !== id);
+        connections.forEach(client => client.connection.send(JSON.stringify({
             client: id,
             text: `I disconnected`,
         })));
