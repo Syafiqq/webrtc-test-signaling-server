@@ -2,6 +2,11 @@ const PORT = process.env.PORT || 8080;
 const INDEX = '/index.html';
 const express = require('express');
 const { Server } = require('ws');
+const ip = require('ip');
+
+const server = express()
+    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+    .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 const wss = new Server({ server });
 wss.on('connection', (ws) => {
@@ -10,10 +15,9 @@ wss.on('connection', (ws) => {
     ws.on('close', () => console.log('Client disconnected'));
 
     ws.on('message', function (message) {
-        console.log('-- message recieved --');
         const json = JSON.parse(message.toString());
-
-        wsServer.clients.forEach(function each(client) {
+        console.log('-- message recieved -- ' + message);
+        ws.clients && ws.clients.forEach(function each(client) {
             if (isSame(ws, client)) {
                 console.log('skip sender');
             }
@@ -23,7 +27,10 @@ wss.on('connection', (ws) => {
         });
     });
 });
+function isSame(ws1, ws2) {
+    // -- compare object --
+    return (ws1 === ws2);
+}
 
-const server = express()
-    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-    .listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+console.log('server start.' + ' ipaddress = ' + ip.address() + ' port = ' + PORT);
