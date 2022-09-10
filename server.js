@@ -17,7 +17,7 @@ wss.on('connection', (ws) => {
     ws.on('message', function (message) {
         const json = JSON.parse(message.toString());
         console.log('-- message recieved -- ' + message);
-        ws.clients && ws.clients.forEach(function each(client) {
+        wss.clients && wss.clients.forEach(function each(client) {
             if (isSame(ws, client)) {
                 console.log('skip sender');
             }
