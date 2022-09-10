@@ -9,34 +9,46 @@ const server = express()
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 const wss = new Server({ server });
-wss.on('connection', (ws) => {
-    console.log('Client connected');
+let clients = [];
 
-    ws.on('close', () => console.log('Client disconnected'));
+wss.on('request', request => {
+    const wss = request.accept();
+    const id = Math.floor(Math.random() * 100);
 
-    ws.on('message', function (message) {
-        const json = JSON.parse(message.toString());
-        console.log('-- message recieved -- ' + message);
-        wss.clients && wss.clients.forEach(function each(client) {
-            if (isSame(ws, client)) {
-                console.log('skip sender');
-            }
-            else {
-                client.send(message);
-            }
-        });
+    clients.forEach(client => client.connection.send(JSON.stringify({
+        client: id,
+        text: 'I am now connected',
+    })));
+    clients.push({ connection: wss, id });
+
+    console.log(`Client-${id} connected`)
+
+    wss.on('message', message => {
+        clients
+            .filter(client => client.id !== id)
+            .forEach(client => client.connection.send(JSON.stringify({
+                client: id,
+                text: message.utf8Data,
+            })));
+        console.log(`Client-${id} broadcast message`)
+    });
+
+    wss.on('close', () => {
+        clients = clients.filter(client => client.id !== id);
+        clients.forEach(client => client.connection.send(JSON.stringify({
+            client: id,
+            text: `I disconnected`,
+        })));
+        console.log(`Client-${id} disconnected`)
     });
 });
-function isSame(ws1, ws2) {
-    // -- compare object --
-    return (ws1 === ws2);
-}
+
 setInterval(() => {
     wss.clients.forEach((client) => {
-        client.send(new Date().toTimeString());
+        client.send(JSON.stringify({
+            text: `Ping - ${new Date().toTimeString()}`,
+        }));
     });
-}, 2000);
-
-
+}, 1000);
 
 console.log('server start.' + ' ipaddress = ' + ip.address() + ' port = ' + PORT);
