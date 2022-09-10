@@ -31,6 +31,12 @@ function isSame(ws1, ws2) {
     // -- compare object --
     return (ws1 === ws2);
 }
+setInterval(() => {
+    wss.clients.forEach((client) => {
+        client.send(new Date().toTimeString());
+    });
+}, 2000);
+
 
 
 console.log('server start.' + ' ipaddress = ' + ip.address() + ' port = ' + PORT);
