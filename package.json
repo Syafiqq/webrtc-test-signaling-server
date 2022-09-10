@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku:stop": "heroku ps:scale web=0",
+    "heroku:start": "heroku ps:scale web=1"
   },
   "keywords": [],
   "author": "",
