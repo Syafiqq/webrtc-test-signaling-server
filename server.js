@@ -16,7 +16,7 @@ function originIsAllowed(origin) {
 }
 
 (function (global) {
-    let connections = {};
+    let connections = [];
     global.getConnections = function () {
         return connections
     }
@@ -39,9 +39,10 @@ wss.on('connection', wss => {
             .filter(client => client.id !== id)
             .forEach(client => client.connection.send(JSON.stringify({
                 client: id,
-                text: message,
+                text: message.utf8Data,
             })));
         console.log(`Client-${id} broadcast message ${message}`)
+        console.log(`Client-${id} broadcast message ${message.utf8Data}`)
     });
 
     wss.on('close', () => {
