@@ -48,6 +48,7 @@ wss.on('connection', wss => {
     });
 });
 
+/*
 setInterval(() => {
     wss.clients.forEach((client) => {
         client.send(JSON.stringify({
@@ -55,5 +56,6 @@ setInterval(() => {
         }));
     });
 }, 1000);
+*/
 
 console.log('server start.' + ' ipaddress = ' + ip.address() + ' port = ' + PORT);
