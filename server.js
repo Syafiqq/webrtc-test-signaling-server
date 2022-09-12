@@ -1,14 +1,23 @@
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8081;
 const INDEX = '/index.html';
 const express = require('express');
+const https = require('https')
 const { Server } = require('ws');
 const ip = require('ip');
+const fs = require('fs')
+
+const privateKey = fs.readFileSync( 'localhost+2-key.pem' );
+const certificate = fs.readFileSync( 'localhost+2.pem' );
 
 const server = express()
     .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-    .listen(PORT, () => console.log(`Listening on ${PORT}`));
+    //.listen(PORT, () => console.log(`Listening on ${PORT}`));
+const sslServer = https.createServer({
+    key: privateKey,
+    cert: certificate
+}, server).listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-const wss = new Server({ server });
+const wss = new Server({ server: sslServer });
 
 function originIsAllowed(origin) {
     // put logic here to detect whether the specified origin is allowed.
