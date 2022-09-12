@@ -7,14 +7,14 @@ const ip = require('ip');
 const fs = require('fs')
 const {json} = require("express");
 
-const privateKey = fs.readFileSync( 'localhost+2-key.pem' );
-const certificate = fs.readFileSync( 'localhost+2.pem' );
-
 const server = express()
     .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 const wss = new Server({ server: server });
-/*const sslServer = https.createServer({
+/*
+const privateKey = fs.readFileSync( 'localhost+2-key.pem' );
+const certificate = fs.readFileSync( 'localhost+2.pem' );
+const sslServer = https.createServer({
     key: privateKey,
     cert: certificate
 }, server).listen(PORT, () => console.log(`Listening on ${PORT}`));
