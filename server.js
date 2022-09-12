@@ -5,6 +5,7 @@ const https = require('https')
 const { Server } = require('ws');
 const ip = require('ip');
 const fs = require('fs')
+const {json} = require("express");
 
 const privateKey = fs.readFileSync( 'localhost+2-key.pem' );
 const certificate = fs.readFileSync( 'localhost+2.pem' );
@@ -25,6 +26,8 @@ function originIsAllowed(origin) {
 }
 
 let connections = [];
+let publishId = undefined
+let publishSdp = undefined
 
 wss.on('connection', wss => {
     const id = Math.floor(Math.random() * 100);
@@ -38,37 +41,56 @@ wss.on('connection', wss => {
     console.log(`Client-${id} connected`)
 
     wss.on('message', message => {
+        console.log(`Client-${id} broadcast message ${message}`)
         let jsonMessage = JSON.parse(message)
         if (jsonMessage.direction === 'publish') {
+            publishSdp = jsonMessage.sdp.sdp
+            publishId = id
             connections
                 .filter(client => client.id === id)
                 .forEach(client => client.connection.send(JSON.stringify({
                     status: 200,
                     direction: 'start',
                     command: 'sendResponse',
-                    streamInfo: jsonMessage.streamInfo,
-                    sdp: jsonMessage.sdp,
-                    userData: jsonMessage.userData
                 })));
         } else if (jsonMessage.direction === 'play') {
-            connections
-                .filter(client => client.id === id)
-                .forEach(client => client.connection.send(JSON.stringify({
-                    status: 200,
-                    direction: 'start',
-                    command: 'sendResponse',
-                    streamInfo: jsonMessage.streamInfo,
-                    sdp: jsonMessage.sdp,
-                    userData: jsonMessage.userData
-                })));
-        } else {
-            connections
-                .filter(client => client.id !== id)
-                .forEach(client => client.connection.send(JSON.stringify({
-                    ...JSON.parse(message),
-                })));
+            if (jsonMessage.command === 'getOffer' ) {
+                connections
+                    .filter(client => client.id === id)
+                    .forEach(client => client.connection.send(JSON.stringify({
+                        status: 200,
+                        direction: 'play',
+                        command: 'sendResponse',
+                        streamInfo: jsonMessage.streamInfo,
+                        sdp: {
+                            sdp: publishSdp,
+                            type: 'offer'
+                        },
+                        userData: jsonMessage.userData,
+                        iceCandidates: jsonMessage.iceCandidates
+                    })));
+            } else if (jsonMessage.command === 'sendResponse' ) {
+                connections
+                    .filter(client => client.id === publishId)
+                    .forEach(client => client.connection.send(JSON.stringify({
+                        status: 200,
+                        direction: 'play',
+                        command: 'takeConfiguration',
+                        streamInfo: jsonMessage.streamInfo,
+                        sdp: {
+                            sdp: jsonMessage.sdp.sdp,
+                            type: 'answer'
+                        },
+                        userData: jsonMessage.userData,
+                        iceCandidates: jsonMessage.iceCandidates
+                    })));
+            }
         }
-        console.log(`Client-${id} broadcast message ${message}`)
+        /*connections
+            .filter(client => client.id !== id)
+            .forEach(client => client.connection.send(JSON.stringify({
+                ...JSON.parse(message),
+            })));*/
     });
 
     wss.on('close', () => {
