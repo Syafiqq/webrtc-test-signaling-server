@@ -38,11 +38,36 @@ wss.on('connection', wss => {
     console.log(`Client-${id} connected`)
 
     wss.on('message', message => {
-        connections
-            .filter(client => client.id !== id)
-            .forEach(client => client.connection.send(JSON.stringify({
-                ...JSON.parse(message),
-            })));
+        let jsonMessage = JSON.parse(message)
+        if (jsonMessage.direction === 'publish') {
+            connections
+                .filter(client => client.id === id)
+                .forEach(client => client.connection.send(JSON.stringify({
+                    status: 200,
+                    direction: 'start',
+                    command: 'sendResponse',
+                    streamInfo: jsonMessage.streamInfo,
+                    sdp: jsonMessage.sdp,
+                    userData: jsonMessage.userData
+                })));
+        } else if (jsonMessage.direction === 'play') {
+            connections
+                .filter(client => client.id === id)
+                .forEach(client => client.connection.send(JSON.stringify({
+                    status: 200,
+                    direction: 'start',
+                    command: 'sendResponse',
+                    streamInfo: jsonMessage.streamInfo,
+                    sdp: jsonMessage.sdp,
+                    userData: jsonMessage.userData
+                })));
+        } else {
+            connections
+                .filter(client => client.id !== id)
+                .forEach(client => client.connection.send(JSON.stringify({
+                    ...JSON.parse(message),
+                })));
+        }
         console.log(`Client-${id} broadcast message ${message}`)
     });
 
