@@ -28,6 +28,7 @@ function originIsAllowed(origin) {
 let connections = [];
 let publishId = undefined
 let publishSdp = undefined
+let publishJsonMessage = undefined
 
 wss.on('connection', wss => {
     const id = Math.floor(Math.random() * 100);
@@ -46,28 +47,23 @@ wss.on('connection', wss => {
         if (jsonMessage.direction === 'publish') {
             publishSdp = jsonMessage.sdp.sdp
             publishId = id
-            connections
+            publishJsonMessage = jsonMessage
+            /*connections
                 .filter(client => client.id === id)
                 .forEach(client => client.connection.send(JSON.stringify({
                     status: 200,
                     direction: 'start',
                     command: 'sendResponse',
-                })));
+                })));*/
         } else if (jsonMessage.direction === 'play') {
             if (jsonMessage.command === 'getOffer' ) {
                 connections
                     .filter(client => client.id === id)
                     .forEach(client => client.connection.send(JSON.stringify({
+                        ...publishJsonMessage,
                         status: 200,
                         direction: 'play',
-                        command: 'sendResponse',
-                        streamInfo: jsonMessage.streamInfo,
-                        sdp: {
-                            sdp: publishSdp,
-                            type: 'offer'
-                        },
-                        userData: jsonMessage.userData,
-                        iceCandidates: jsonMessage.iceCandidates
+                        command: 'getOffer',
                     })));
             } else if (jsonMessage.command === 'sendResponse' ) {
                 connections
@@ -75,7 +71,7 @@ wss.on('connection', wss => {
                     .forEach(client => client.connection.send(JSON.stringify({
                         status: 200,
                         direction: 'play',
-                        command: 'takeConfiguration',
+                        command: 'getResponse',
                         streamInfo: jsonMessage.streamInfo,
                         sdp: {
                             sdp: jsonMessage.sdp.sdp,
