@@ -7,19 +7,18 @@ const ip = require('ip');
 const fs = require('fs')
 const {json} = require("express");
 
-const server = express()
-    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-    .listen(PORT, () => console.log(`Listening on ${PORT}`));
-const wss = new Server({ server: server });
-/*
 const privateKey = fs.readFileSync( 'localhost+2-key.pem' );
 const certificate = fs.readFileSync( 'localhost+2.pem' );
+
+const server = express()
+    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+    //.listen(PORT, () => console.log(`Listening on ${PORT}`));
 const sslServer = https.createServer({
     key: privateKey,
     cert: certificate
 }, server).listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-const wss = new Server({ server: sslServer });*/
+const wss = new Server({ server: sslServer });
 
 function originIsAllowed(origin) {
     // put logic here to detect whether the specified origin is allowed.
